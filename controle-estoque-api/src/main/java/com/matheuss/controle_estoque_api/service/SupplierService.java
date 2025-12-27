@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.matheuss.controle_estoque_api.domain.Supplier;
+import com.matheuss.controle_estoque_api.dto.SupplierCreateDTO;
 import com.matheuss.controle_estoque_api.repository.SupplierRepository;
 
 @Service
@@ -15,30 +17,35 @@ public class SupplierService {
     @Autowired
     private SupplierRepository supplierRepository;
 
+    // --- CREATE ---
+    @Transactional
+    public Supplier createSupplier(SupplierCreateDTO dto) {
+        Supplier newSupplier = new Supplier();
+        newSupplier.setName(dto.getName());
+        newSupplier.setCnpj(dto.getCnpj());
+        newSupplier.setEmail(dto.getEmail());
+        newSupplier.setPhone(dto.getPhone());
+        return supplierRepository.save(newSupplier);
+    }
+
+    // --- READ ---
+    @Transactional(readOnly = true)
     public List<Supplier> findAll() {
         return supplierRepository.findAll();
     }
 
-    public Supplier save(Supplier supplier) {
-        return supplierRepository.save(supplier);
-    }
-
+    @Transactional(readOnly = true)
     public Optional<Supplier> findById(Long id) {
         return supplierRepository.findById(id);
     }
 
-    public Supplier update(Long id, Supplier supplierToUpdate) {
-        Optional<Supplier> optionalSupplier = supplierRepository.findById(id);
-
-        if (optionalSupplier.isPresent()) {
-            Supplier existingSupplier = optionalSupplier.get();
-            existingSupplier.setName(supplierToUpdate.getName());
-            existingSupplier.setCnpj(supplierToUpdate.getCnpj());
-            existingSupplier.setEmail(supplierToUpdate.getEmail());
-            existingSupplier.setPhone(supplierToUpdate.getPhone());
-            return supplierRepository.save(existingSupplier);
-        } else {
-            return null;
+    // --- DELETE ---
+    @Transactional
+    public boolean delete(Long id) {
+        if (supplierRepository.existsById(id)) {
+            supplierRepository.deleteById(id);
+            return true;
         }
+        return false;
     }
 }
