@@ -15,13 +15,18 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class Peripheral extends Asset {
 
-    @Column(name = "peripheral_name")
-    private String name;
+    // Campos específicos de um periférico
     
-    private String type;
-    private String model;
+    @Column(nullable = false)
+    private String type; // Ex: "Mouse", "Teclado", "Headset", "Monitor"
 
+    private String name; // Ex: "Mouse Gamer Logitech G502", "Teclado Mecânico HyperX"
+    private String model; // Ex: "G502 Hero", "Alloy FPS Pro"
+    private String serialNumber; // Número de série único do dispositivo
+
+    // Relacionamento opcional: um periférico pode estar conectado a um computador.
+    // Usamos FetchType.LAZY para otimização.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinColumn(name = "computer_id")
+    private Computer computer;
 }

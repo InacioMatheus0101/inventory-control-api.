@@ -4,8 +4,8 @@ import com.matheuss.controle_estoque_api.domain.Location;
 import com.matheuss.controle_estoque_api.dto.LocationCreateDTO;
 import com.matheuss.controle_estoque_api.dto.LocationResponseDTO;
 import com.matheuss.controle_estoque_api.dto.LocationUpdateDTO;
+import com.matheuss.controle_estoque_api.mapper.LocationMapper; // IMPORT
 import com.matheuss.controle_estoque_api.repository.LocationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,49 +20,38 @@ public class LocationService {
     @Autowired
     private LocationRepository locationRepository;
 
-    // CREATE
+    @Autowired
+    private LocationMapper locationMapper; // INJEÇÃO
+
     @Transactional
     public LocationResponseDTO createLocation(LocationCreateDTO dto) {
-        Location newLocation = new Location();
-        newLocation.setPaNumber(dto.getPaNumber());
-        newLocation.setFloor(dto.getFloor());
-        newLocation.setSector(dto.getSector());
-        newLocation.setDescription(dto.getDescription());
-
+        Location newLocation = locationMapper.toEntity(dto);
         Location savedLocation = locationRepository.save(newLocation);
-        return toResponseDTO(savedLocation);
+        return locationMapper.toResponseDTO(savedLocation);
     }
 
-    // READ (ALL)
     @Transactional(readOnly = true)
     public List<LocationResponseDTO> findAllLocations() {
         return locationRepository.findAll().stream()
-                .map(this::toResponseDTO)
+                .map(locationMapper::toResponseDTO) // USO DO MAPPER
                 .collect(Collectors.toList());
     }
 
-    // READ (BY ID)
     @Transactional(readOnly = true)
     public Optional<LocationResponseDTO> findLocationById(Long id) {
         return locationRepository.findById(id)
-                .map(this::toResponseDTO);
+                .map(locationMapper::toResponseDTO); // USO DO MAPPER
     }
 
-    // UPDATE
     @Transactional
     public Optional<LocationResponseDTO> updateLocation(Long id, LocationUpdateDTO dto) {
         return locationRepository.findById(id).map(existingLocation -> {
-            existingLocation.setPaNumber(dto.getPaNumber());
-            existingLocation.setFloor(dto.getFloor());
-            existingLocation.setSector(dto.getSector());
-            existingLocation.setDescription(dto.getDescription());
-            
+            locationMapper.updateEntityFromDto(dto, existingLocation); // USO DO MAPPER
             Location updatedLocation = locationRepository.save(existingLocation);
-            return toResponseDTO(updatedLocation);
+            return locationMapper.toResponseDTO(updatedLocation);
         });
     }
 
-    // DELETE
     @Transactional
     public boolean deleteLocation(Long id) {
         if (locationRepository.existsById(id)) {
@@ -70,16 +59,5 @@ public class LocationService {
             return true;
         }
         return false;
-    }
-
-    // Método auxiliar para converter Entidade em DTO
-    private LocationResponseDTO toResponseDTO(Location location) {
-        LocationResponseDTO dto = new LocationResponseDTO();
-        dto.setId(location.getId());
-        dto.setPaNumber(location.getPaNumber());
-        dto.setFloor(location.getFloor());
-        dto.setSector(location.getSector());
-        dto.setDescription(location.getDescription());
-        return dto;
     }
 }

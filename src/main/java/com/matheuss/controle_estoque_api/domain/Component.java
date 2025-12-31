@@ -15,14 +15,26 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class Component extends Asset {
 
-    @Column(name = "component_name")
-    private String name;
-    
-    private String type;
-    private String specification;
-    private int capacityInGB;
+    // --- CAMPOS DO SEU CÓDIGO, MANTIDOS E REFINADOS ---
 
+    // O tipo de componente (RAM, SSD, etc.) virá da Categoria.
+    // O 'name' pode ser o nome do produto.
+    @Column(name = "component_name")
+    private String name; // Ex: "Corsair Vengeance LPX", "Kingston A400"
+
+    private String model; // Adicionamos um campo para o modelo específico
+    private String serialNumber; // Essencial para rastrear peças individuais
+
+    // --- RELACIONAMENTOS ---
+
+    // Sua ideia de usar Categoria é excelente. Mantemos.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    // Adicionamos o relacionamento OPCIONAL com Computer, como discutimos.
+    // Se 'computer_id' for nulo, o componente está em estoque.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "computer_id")
+    private Computer computer;
 }

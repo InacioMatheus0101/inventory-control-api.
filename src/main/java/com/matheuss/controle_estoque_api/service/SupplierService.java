@@ -4,6 +4,7 @@ import com.matheuss.controle_estoque_api.domain.Supplier;
 import com.matheuss.controle_estoque_api.dto.SupplierCreateDTO;
 import com.matheuss.controle_estoque_api.dto.SupplierResponseDTO;
 import com.matheuss.controle_estoque_api.dto.SupplierUpdateDTO;
+import com.matheuss.controle_estoque_api.mapper.SupplierMapper; // IMPORT
 import com.matheuss.controle_estoque_api.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,49 +20,38 @@ public class SupplierService {
     @Autowired
     private SupplierRepository supplierRepository;
 
-    // CREATE
+    @Autowired
+    private SupplierMapper supplierMapper; // INJEÇÃO
+
     @Transactional
     public SupplierResponseDTO createSupplier(SupplierCreateDTO dto) {
-        Supplier newSupplier = new Supplier();
-        newSupplier.setName(dto.getName());
-        newSupplier.setCnpj(dto.getCnpj());
-        newSupplier.setEmail(dto.getEmail());
-        newSupplier.setPhone(dto.getPhone());
-        
+        Supplier newSupplier = supplierMapper.toEntity(dto);
         Supplier savedSupplier = supplierRepository.save(newSupplier);
-        return toResponseDTO(savedSupplier);
+        return supplierMapper.toResponseDTO(savedSupplier);
     }
 
-    // READ (ALL)
     @Transactional(readOnly = true)
     public List<SupplierResponseDTO> findAll() {
         return supplierRepository.findAll().stream()
-                .map(this::toResponseDTO)
+                .map(supplierMapper::toResponseDTO) // USO DO MAPPER
                 .collect(Collectors.toList());
     }
 
-    // READ (BY ID)
     @Transactional(readOnly = true)
     public Optional<SupplierResponseDTO> findById(Long id) {
         return supplierRepository.findById(id)
-                .map(this::toResponseDTO);
+                .map(supplierMapper::toResponseDTO); // USO DO MAPPER
     }
 
-    // UPDATE
     @Transactional
     public Optional<SupplierResponseDTO> updateSupplier(Long id, SupplierUpdateDTO dto) {
         return supplierRepository.findById(id).map(existingSupplier -> {
-            existingSupplier.setName(dto.getName());
-            existingSupplier.setCnpj(dto.getCnpj());
-            existingSupplier.setEmail(dto.getEmail());
-            existingSupplier.setPhone(dto.getPhone());
-            
+            supplierMapper.updateEntityFromDto(dto, existingSupplier); // USO DO MAPPER
             Supplier updatedSupplier = supplierRepository.save(existingSupplier);
-            return toResponseDTO(updatedSupplier);
+            return supplierMapper.toResponseDTO(updatedSupplier);
         });
     }
 
-    // DELETE
     @Transactional
     public boolean delete(Long id) {
         if (supplierRepository.existsById(id)) {
@@ -69,16 +59,5 @@ public class SupplierService {
             return true;
         }
         return false;
-    }
-
-    // Método auxiliar para converter Entidade em DTO
-    private SupplierResponseDTO toResponseDTO(Supplier supplier) {
-        SupplierResponseDTO dto = new SupplierResponseDTO();
-        dto.setId(supplier.getId());
-        dto.setName(supplier.getName());
-        dto.setCnpj(supplier.getCnpj());
-        dto.setEmail(supplier.getEmail());
-        dto.setPhone(supplier.getPhone());
-        return dto;
     }
 }
