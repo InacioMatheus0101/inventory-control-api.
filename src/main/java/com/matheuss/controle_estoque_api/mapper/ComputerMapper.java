@@ -7,32 +7,37 @@ import com.matheuss.controle_estoque_api.dto.ComputerUpdateDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = {
-    ReferenceMapper.class,
-    ComponentMapper.class // Essencial para o mapeamento da lista
-})
+@Mapper(
+    componentModel = "spring",
+    uses = { ReferenceMapper.class, ComponentMapper.class },
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface ComputerMapper {
 
-    @Mapping(source = "categoryId", target = "category")
+    // --- MAPEAMENTO DE CRIAÇÃO (Permanece o mesmo) ---
     @Mapping(source = "supplierId", target = "supplier")
+    @Mapping(source = "categoryId", target = "category")
     @Mapping(source = "locationId", target = "location")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "notes", ignore = true)
     @Mapping(target = "components", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Computer toEntity(ComputerCreateDTO dto);
 
-    @Mapping(source = "categoryId", target = "category")
+    // Reativamos o mapeamento das entidades. O MapStruct usará o ReferenceMapper
+  
     @Mapping(source = "supplierId", target = "supplier")
+    @Mapping(source = "categoryId", target = "category")
     @Mapping(source = "locationId", target = "location")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "notes", ignore = true)
     @Mapping(target = "components", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(ComputerUpdateDTO dto, @MappingTarget Computer computer);
 
-    // --- CORREÇÃO PRINCIPAL AQUI ---
-    // Adicionamos um @Mapping explícito para a lista de componentes.
-    // Isso força o MapStruct a usar o ComponentMapper para converter cada item.
+    // --- MAPEAMENTO DE RESPOSTA (Permanece o mesmo) ---
     @Mapping(source = "components", target = "components")
     ComputerResponseDTO toResponseDTO(Computer computer);
 }

@@ -4,6 +4,7 @@ import com.matheuss.controle_estoque_api.dto.LocationCreateDTO;
 import com.matheuss.controle_estoque_api.dto.LocationResponseDTO;
 import com.matheuss.controle_estoque_api.dto.LocationUpdateDTO;
 import com.matheuss.controle_estoque_api.service.LocationService;
+import jakarta.validation.Valid; // 1. Importe a anotação @Valid
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class LocationController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<LocationResponseDTO> createLocation(@RequestBody LocationCreateDTO dto) {
+    public ResponseEntity<LocationResponseDTO> createLocation(@Valid @RequestBody LocationCreateDTO dto) { // 2. Adicione @Valid aqui
         LocationResponseDTO createdLocation = locationService.createLocation(dto);
         URI locationUri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(createdLocation.getId()).toUri();
@@ -44,7 +45,7 @@ public class LocationController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<LocationResponseDTO> updateLocation(@PathVariable("id") Long id, @RequestBody LocationUpdateDTO dto) {
+    public ResponseEntity<LocationResponseDTO> updateLocation(@PathVariable("id") Long id, @Valid @RequestBody LocationUpdateDTO dto) { // 3. Adicione @Valid aqui também
         return locationService.updateLocation(id, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

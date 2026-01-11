@@ -4,6 +4,7 @@ import com.matheuss.controle_estoque_api.dto.ComputerCreateDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerResponseDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerUpdateDTO;
 import com.matheuss.controle_estoque_api.service.ComputerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +20,8 @@ public class ComputerController {
     @Autowired
     private ComputerService computerService;
 
-    // --- CREATE ---
     @PostMapping
-    public ResponseEntity<ComputerResponseDTO> createComputer(@RequestBody ComputerCreateDTO computerDTO) {
+    public ResponseEntity<ComputerResponseDTO> createComputer(@RequestBody @Valid ComputerCreateDTO computerDTO) {
         ComputerResponseDTO createdComputer = computerService.createComputer(computerDTO);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -31,33 +31,29 @@ public class ComputerController {
         return ResponseEntity.created(location).body(createdComputer);
     }
 
-    // --- READ (ALL) ---
     @GetMapping
     public ResponseEntity<List<ComputerResponseDTO>> getAllComputers() {
-        List<ComputerResponseDTO> computers = computerService.findAllComputers();
+        List<ComputerResponseDTO> computers = computerService.getAllComputers();
         return ResponseEntity.ok(computers);
     }
 
-    // --- READ (BY ID) ---
-    // ESTE É O MÉTODO QUE PROVAVELMENTE ESTAVA COM O ERRO DE SINTAXE
     @GetMapping("/{id}")
-    public ResponseEntity<ComputerResponseDTO> getComputerById(@PathVariable("id") Long id) { // Correção do @PathVariable
-        return computerService.findComputerById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build()); // Ponto e vírgula garantido aqui
+    public ResponseEntity<ComputerResponseDTO> getComputerById(@PathVariable Long id) {
+        ComputerResponseDTO computer = computerService.getComputerById(id);
+        return ResponseEntity.ok(computer);
     }
 
-    // --- UPDATE ---
+    // ====================================================================
+    // == ENDPOINT DE ATUALIZAÇÃO REFINADO ==
+    // ====================================================================
     @PutMapping("/{id}")
-    public ResponseEntity<ComputerResponseDTO> updateComputer(@PathVariable("id") Long id, @RequestBody ComputerUpdateDTO computerDTO) {
-        return computerService.updateComputer(id, computerDTO)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ComputerResponseDTO> updateComputer(@PathVariable Long id, @RequestBody @Valid ComputerUpdateDTO computerDTO) {
+        ComputerResponseDTO updatedComputer = computerService.updateComputer(id, computerDTO);
+        return ResponseEntity.ok(updatedComputer);
     }
 
-    // --- DELETE ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComputer(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteComputer(@PathVariable Long id) {
         if (computerService.deleteComputer(id)) {
             return ResponseEntity.noContent().build();
         } else {

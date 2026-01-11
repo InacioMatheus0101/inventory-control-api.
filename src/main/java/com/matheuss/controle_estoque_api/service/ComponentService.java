@@ -6,12 +6,12 @@ import com.matheuss.controle_estoque_api.dto.ComponentResponseDTO;
 import com.matheuss.controle_estoque_api.dto.ComponentUpdateDTO;
 import com.matheuss.controle_estoque_api.mapper.ComponentMapper;
 import com.matheuss.controle_estoque_api.repository.ComponentRepository;
+import jakarta.persistence.EntityNotFoundException; // <<< IMPORT NECESSÁRIO
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +23,7 @@ public class ComponentService {
     @Autowired
     private ComponentMapper componentMapper;
 
+    // --- CREATE (Permanece o mesmo) ---
     @Transactional
     public ComponentResponseDTO createComponent(ComponentCreateDTO dto) {
         Component newComponent = componentMapper.toEntity(dto);
@@ -30,34 +31,39 @@ public class ComponentService {
         return componentMapper.toResponseDTO(savedComponent);
     }
 
+    // --- READ (ALL) (Muda o nome para consistência) ---
     @Transactional(readOnly = true)
-    public List<ComponentResponseDTO> findAllComponents() {
+    public List<ComponentResponseDTO> getAllComponents() {
         return componentRepository.findAll().stream()
                 .map(componentMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    // --- READ (BY ID) (Refatorado para lançar exceção) ---
     @Transactional(readOnly = true)
-    public Optional<ComponentResponseDTO> findComponentById(Long id) {
+    public ComponentResponseDTO getComponentById(Long id) {
         return componentRepository.findById(id)
-                .map(componentMapper::toResponseDTO);
+                .map(componentMapper::toResponseDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Componente não encontrado com o ID: " + id));
     }
 
+    // --- UPDATE (Refatorado para lançar exceção) ---
     @Transactional
-    public Optional<ComponentResponseDTO> updateComponent(Long id, ComponentUpdateDTO dto) {
-        return componentRepository.findById(id).map(existingComponent -> {
-            componentMapper.updateEntityFromDto(dto, existingComponent);
-            Component updatedComponent = componentRepository.save(existingComponent);
-            return componentMapper.toResponseDTO(updatedComponent);
-        });
+    public ComponentResponseDTO updateComponent(Long id, ComponentUpdateDTO dto) {
+        Component existingComponent = componentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Componente não encontrado com o ID: " + id));
+
+        componentMapper.updateEntityFromDto(dto, existingComponent);
+        Component updatedComponent = componentRepository.save(existingComponent);
+        return componentMapper.toResponseDTO(updatedComponent);
     }
 
+    // --- DELETE (Refatorado para ser void e lançar exceção) ---
     @Transactional
-    public boolean deleteComponent(Long id) {
-        if (componentRepository.existsById(id)) {
-            componentRepository.deleteById(id);
-            return true;
+    public void deleteComponent(Long id) {
+        if (!componentRepository.existsById(id)) {
+            throw new EntityNotFoundException("Componente não encontrado com o ID: " + id);
         }
-        return false;
+        componentRepository.deleteById(id);
     }
 }

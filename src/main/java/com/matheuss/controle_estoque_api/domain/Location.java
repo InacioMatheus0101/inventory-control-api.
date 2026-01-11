@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "locations") // Nome da tabela no banco
+@Table(name = "location") // Nome da tabela no banco
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

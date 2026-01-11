@@ -9,33 +9,36 @@ import com.matheuss.controle_estoque_api.dto.PeripheralUpdateDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy; // <<< IMPORT NECESSÁRIO
 
-@Mapper(componentModel = "spring", uses = { ReferenceMapper.class }) // Usa nosso helper para buscar entidades por ID
+@Mapper(
+    componentModel = "spring",
+    uses = { ReferenceMapper.class },
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE // <<< CORREÇÃO FINAL
+)
 public interface PeripheralMapper {
 
-    // --- MAPEAMENTO PARA ENTIDADE ---
-
-    @Mapping(source = "supplierId", target = "supplier")
-    @Mapping(source = "locationId", target = "location")
-    @Mapping(source = "computerId", target = "computer") // Mapeia o ID do computador para a entidade Computer
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "notes", ignore = true)
-    Peripheral toEntity(PeripheralCreateDTO dto);
-
+    // --- MAPEAMENTO PARA ENTIDADE (CRIAÇÃO) ---
     @Mapping(source = "supplierId", target = "supplier")
     @Mapping(source = "locationId", target = "location")
     @Mapping(source = "computerId", target = "computer")
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "notes", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Peripheral toEntity(PeripheralCreateDTO dto);
+
+    // --- MAPEAMENTO PARA ENTIDADE (ATUALIZAÇÃO) ---
+    @Mapping(source = "supplierId", target = "supplier")
+    @Mapping(source = "locationId", target = "location")
+    @Mapping(source = "computerId", target = "computer")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(PeripheralUpdateDTO dto, @MappingTarget Peripheral peripheral);
 
-
     // --- MAPEAMENTO PARA DTO DE RESPOSTA ---
-
     PeripheralResponseDTO toResponseDTO(Peripheral peripheral);
 
     // --- MAPEAMENTO AUXILIAR ---
-    // O MapStruct precisa saber como converter um Computer completo
-    // para o ComputerSimpleResponseDTO que usamos no PeripheralResponseDTO.
     ComputerSimpleResponseDTO toComputerSimpleDTO(Computer computer);
 }

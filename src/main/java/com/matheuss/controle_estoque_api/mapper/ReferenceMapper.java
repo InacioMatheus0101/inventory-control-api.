@@ -45,7 +45,7 @@ public class ReferenceMapper {
     // --- MÉTODO NOVO ADICIONADO ---
     public Computer toComputer(Long computerId) {
         // O relacionamento com Computer é opcional, então se o ID for nulo, retornamos nulo.
-        if (computerId == null) {
+        if (computerId == null || computerId == 0L) {
             return null;
         }
         return computerRepository.findById(computerId)

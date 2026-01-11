@@ -4,6 +4,7 @@ import com.matheuss.controle_estoque_api.dto.ComponentCreateDTO;
 import com.matheuss.controle_estoque_api.dto.ComponentResponseDTO;
 import com.matheuss.controle_estoque_api.dto.ComponentUpdateDTO;
 import com.matheuss.controle_estoque_api.service.ComponentService;
+import jakarta.validation.Valid; // <<< IMPORT NECESSÁRIO
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class ComponentController {
 
     // --- CREATE ---
     @PostMapping
-    public ResponseEntity<ComponentResponseDTO> createComponent(@RequestBody ComponentCreateDTO dto) {
+    public ResponseEntity<ComponentResponseDTO> createComponent(@RequestBody @Valid ComponentCreateDTO dto) {
         ComponentResponseDTO createdComponent = componentService.createComponent(dto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -34,34 +35,28 @@ public class ComponentController {
     // --- READ (ALL) ---
     @GetMapping
     public ResponseEntity<List<ComponentResponseDTO>> getAllComponents() {
-        List<ComponentResponseDTO> components = componentService.findAllComponents();
+        List<ComponentResponseDTO> components = componentService.getAllComponents();
         return ResponseEntity.ok(components);
     }
 
-    // --- READ (BY ID) ---
+    // --- READ (BY ID) (Simplificado) ---
     @GetMapping("/{id}")
-    public ResponseEntity<ComponentResponseDTO> getComponentById(@PathVariable("id") Long id) {
-        return componentService.findComponentById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ComponentResponseDTO> getComponentById(@PathVariable Long id) {
+        ComponentResponseDTO component = componentService.getComponentById(id);
+        return ResponseEntity.ok(component);
     }
 
-    // --- UPDATE ---
+    // --- UPDATE (Simplificado) ---
     @PutMapping("/{id}")
-    public ResponseEntity<ComponentResponseDTO> updateComponent(@PathVariable("id") Long id, @RequestBody ComponentUpdateDTO dto) {
-        return componentService.updateComponent(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ComponentResponseDTO> updateComponent(@PathVariable Long id, @RequestBody @Valid ComponentUpdateDTO dto) {
+        ComponentResponseDTO updatedComponent = componentService.updateComponent(id, dto);
+        return ResponseEntity.ok(updatedComponent);
     }
 
-    // --- DELETE ---
+    // --- DELETE (Simplificado) ---
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComponent(@PathVariable("id") Long id) {
-        boolean wasDeleted = componentService.deleteComponent(id);
-        if (wasDeleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteComponent(@PathVariable Long id) {
+        componentService.deleteComponent(id);
+        return ResponseEntity.noContent().build();
     }
 }
