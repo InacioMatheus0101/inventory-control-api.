@@ -13,7 +13,7 @@ public class ComputerResponseDTO {
     private Long id;
     private String assetTag;
     private AssetStatus status;
-    private EquipmentState equipmentState; // 3. Adicione o estado do equipamento
+    private EquipmentState equipmentState;
     private LocalDate purchaseDate;
     private String notes;
 
@@ -32,9 +32,14 @@ public class ComputerResponseDTO {
     private String os;
 
     // Campos de Auditoria
-    private LocalDateTime createdAt; // 4. Adicione a data de criação
-    private LocalDateTime updatedAt; // 5. Adicione a data de atualização
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     
-     // campo para user
-     private UserSimpleResponseDTO user;
+    // Usuário ao qual o ativo está alocado
+    private UserSimpleResponseDTO user;
+
+    // ====================================================================
+    // == NOVO CAMPO: LISTA COM O HISTÓRICO DE EVENTOS DO ATIVO ==
+    // ====================================================================
+    private List<AssetHistoryResponseDTO> history;
 }

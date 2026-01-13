@@ -2,6 +2,7 @@ package com.matheuss.controle_estoque_api.domain;
 
 import com.matheuss.controle_estoque_api.domain.enums.AssetStatus;
 import com.matheuss.controle_estoque_api.domain.enums.EquipmentState;
+import com.matheuss.controle_estoque_api.domain.history.AssetHistory; // <-- IMPORT ADICIONADO
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -12,6 +13,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList; // <-- IMPORT ADICIONADO
+import java.util.List;      // <-- IMPORT ADICIONADO
 
 @Entity
 @Table(name = "asset")
@@ -51,15 +54,9 @@ public abstract class Asset {
     @JoinColumn(name = "location_id")
     private Location location;
 
-    // ====================================================================
-    // == NOVO RELACIONAMENTO COM USER (COLABORADOR) ==
-    // Um ativo pode ou não estar alocado a um usuário.
-    // A ausência de 'nullable = false' torna a coluna 'user_id' opcional no banco.
-    // ====================================================================
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
 
     // --- CAMPOS DE AUDITORIA ---
     @CreatedDate
@@ -69,4 +66,17 @@ public abstract class Asset {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    // ====================================================================
+    // == NOVA IMPLEMENTAÇÃO: RELACIONAMENTO COM O HISTÓRICO DE EVENTOS ==
+    // Define o lado "um" do relacionamento "um-para-muitos" com AssetHistory.
+    // mappedBy = "asset": Indica que a entidade AssetHistory é a dona do relacionamento
+    //                     e possui o campo "asset" com a anotação @ManyToOne.
+    // cascade = CascadeType.ALL: Garante que as operações (criar, deletar) no Asset
+    //                            sejam propagadas para seus registros de histórico.
+    // orphanRemoval = true: Se um registro de histórico for removido desta lista,
+    //                       ele será deletado do banco de dados.
+    // ====================================================================
+    @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AssetHistory> history = new ArrayList<>();
 }
