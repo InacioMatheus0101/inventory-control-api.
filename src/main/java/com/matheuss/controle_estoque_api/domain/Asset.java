@@ -3,7 +3,7 @@ package com.matheuss.controle_estoque_api.domain;
 import com.matheuss.controle_estoque_api.domain.enums.AssetStatus;
 import com.matheuss.controle_estoque_api.domain.enums.EquipmentState;
 import jakarta.persistence.*;
-import jakarta.persistence.Table; // <<< 1. IMPORTAR ESTA LINHA
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "asset") // <<< 2. ADICIONAR ESTA LINHA
+@Table(name = "asset")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "asset_type")
 @Data
@@ -51,6 +51,17 @@ public abstract class Asset {
     @JoinColumn(name = "location_id")
     private Location location;
 
+    // ====================================================================
+    // == NOVO RELACIONAMENTO COM USER (COLABORADOR) ==
+    // Um ativo pode ou não estar alocado a um usuário.
+    // A ausência de 'nullable = false' torna a coluna 'user_id' opcional no banco.
+    // ====================================================================
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
+    // --- CAMPOS DE AUDITORIA ---
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

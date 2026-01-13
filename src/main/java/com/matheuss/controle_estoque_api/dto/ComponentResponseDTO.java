@@ -1,6 +1,8 @@
 package com.matheuss.controle_estoque_api.dto;
 
+import com.matheuss.controle_estoque_api.domain.User;
 import com.matheuss.controle_estoque_api.domain.enums.AssetStatus;
+import com.matheuss.controle_estoque_api.dto.UserSimpleResponseDTO;
 import lombok.Data;
 import java.time.LocalDate;
 
@@ -16,5 +18,7 @@ public class ComponentResponseDTO {
     private CategoryResponseDTO category;
     private SupplierResponseDTO supplier;
     private LocationResponseDTO location;
+
+     private UserSimpleResponseDTO user;
   
 }

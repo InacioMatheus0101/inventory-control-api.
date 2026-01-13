@@ -34,4 +34,7 @@ public class ComputerResponseDTO {
     // Campos de Auditoria
     private LocalDateTime createdAt; // 4. Adicione a data de criação
     private LocalDateTime updatedAt; // 5. Adicione a data de atualização
+    
+     // campo para user
+     private UserSimpleResponseDTO user;
 }

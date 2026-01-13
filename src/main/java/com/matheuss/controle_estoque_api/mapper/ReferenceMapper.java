@@ -1,11 +1,13 @@
 package com.matheuss.controle_estoque_api.mapper;
 
 import com.matheuss.controle_estoque_api.domain.Category;
-import com.matheuss.controle_estoque_api.domain.Computer; // <-- IMPORT NOVO
+import com.matheuss.controle_estoque_api.domain.Computer;
 import com.matheuss.controle_estoque_api.domain.Location;
 import com.matheuss.controle_estoque_api.domain.Supplier;
+import com.matheuss.controle_estoque_api.domain.User; // Import necessário
+import com.matheuss.controle_estoque_api.dto.UserSimpleResponseDTO; // Import necessário
 import com.matheuss.controle_estoque_api.repository.CategoryRepository;
-import com.matheuss.controle_estoque_api.repository.ComputerRepository; // <-- IMPORT NOVO
+import com.matheuss.controle_estoque_api.repository.ComputerRepository;
 import com.matheuss.controle_estoque_api.repository.LocationRepository;
 import com.matheuss.controle_estoque_api.repository.SupplierRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +24,7 @@ public class ReferenceMapper {
     @Autowired
     private LocationRepository locationRepository;
     @Autowired
-    private ComputerRepository computerRepository; // <-- INJEÇÃO NOVA
+    private ComputerRepository computerRepository;
 
     public Category toCategory(Long categoryId) {
         if (categoryId == null) return null;
@@ -42,13 +44,31 @@ public class ReferenceMapper {
                 .orElseThrow(() -> new EntityNotFoundException("Localização não encontrada com o ID: " + locationId));
     }
 
-    // --- MÉTODO NOVO ADICIONADO ---
     public Computer toComputer(Long computerId) {
-        // O relacionamento com Computer é opcional, então se o ID for nulo, retornamos nulo.
         if (computerId == null || computerId == 0L) {
             return null;
         }
         return computerRepository.findById(computerId)
                 .orElseThrow(() -> new EntityNotFoundException("Computador não encontrado com o ID: " + computerId));
+    }
+
+    /**
+     * Converte uma entidade User completa para um DTO simplificado,
+     * contendo apenas as informações essenciais para exibição.
+     * Este método serve como a única fonte de verdade para esta conversão,
+     * evitando ambiguidade nos mappers que o utilizam.
+     *
+     * @param user A entidade User a ser convertida.
+     * @return Um UserSimpleResponseDTO preenchido ou null se o usuário for nulo.
+     */
+    public UserSimpleResponseDTO toUserSimpleDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserSimpleResponseDTO dto = new UserSimpleResponseDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setUsername(user.getUsername());
+        return dto;
     }
 }

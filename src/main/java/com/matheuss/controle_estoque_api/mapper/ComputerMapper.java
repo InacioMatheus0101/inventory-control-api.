@@ -1,9 +1,12 @@
 package com.matheuss.controle_estoque_api.mapper;
 
 import com.matheuss.controle_estoque_api.domain.Computer;
+import com.matheuss.controle_estoque_api.domain.User;
 import com.matheuss.controle_estoque_api.dto.ComputerCreateDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerResponseDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerUpdateDTO;
+import com.matheuss.controle_estoque_api.dto.UserSimpleResponseDTO;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -40,4 +43,6 @@ public interface ComputerMapper {
     // --- MAPEAMENTO DE RESPOSTA (Permanece o mesmo) ---
     @Mapping(source = "components", target = "components")
     ComputerResponseDTO toResponseDTO(Computer computer);
+
+    
 }

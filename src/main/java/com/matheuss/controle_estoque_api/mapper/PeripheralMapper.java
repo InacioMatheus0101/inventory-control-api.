@@ -2,10 +2,13 @@ package com.matheuss.controle_estoque_api.mapper;
 
 import com.matheuss.controle_estoque_api.domain.Computer;
 import com.matheuss.controle_estoque_api.domain.Peripheral;
+import com.matheuss.controle_estoque_api.domain.User;
 import com.matheuss.controle_estoque_api.dto.ComputerSimpleResponseDTO;
 import com.matheuss.controle_estoque_api.dto.PeripheralCreateDTO;
 import com.matheuss.controle_estoque_api.dto.PeripheralResponseDTO;
 import com.matheuss.controle_estoque_api.dto.PeripheralUpdateDTO;
+import com.matheuss.controle_estoque_api.dto.UserSimpleResponseDTO;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -23,6 +26,7 @@ public interface PeripheralMapper {
     @Mapping(source = "locationId", target = "location")
     @Mapping(source = "computerId", target = "computer")
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Peripheral toEntity(PeripheralCreateDTO dto);
@@ -31,6 +35,7 @@ public interface PeripheralMapper {
     @Mapping(source = "supplierId", target = "supplier")
     @Mapping(source = "locationId", target = "location")
     @Mapping(source = "computerId", target = "computer")
+    @Mapping(target = "user", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -41,4 +46,6 @@ public interface PeripheralMapper {
 
     // --- MAPEAMENTO AUXILIAR ---
     ComputerSimpleResponseDTO toComputerSimpleDTO(Computer computer);
+
+     
 }

@@ -1,0 +1,14 @@
+package com.matheuss.controle_estoque_api.dto;
+
+import lombok.Data;
+import java.util.List;
+
+@Data
+public class UserResponseDTO {
+    private Long id;
+    private String name;
+    private String username;
+    private String department;
+    // Usaremos um DTO simples para os ativos para não expor dados demais
+    private List<AssetSimpleResponseDTO> assets;
+}
