@@ -1,12 +1,13 @@
 package com.matheuss.controle_estoque_api.service;
 
 import com.matheuss.controle_estoque_api.domain.Peripheral;
+import com.matheuss.controle_estoque_api.domain.history.HistoryEventType; // <-- IMPORT ADICIONADO
 import com.matheuss.controle_estoque_api.dto.PeripheralCreateDTO;
 import com.matheuss.controle_estoque_api.dto.PeripheralResponseDTO;
 import com.matheuss.controle_estoque_api.dto.PeripheralUpdateDTO;
 import com.matheuss.controle_estoque_api.mapper.PeripheralMapper;
 import com.matheuss.controle_estoque_api.repository.PeripheralRepository;
-import jakarta.persistence.EntityNotFoundException; // <<< IMPORT NECESSÁRIO
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +24,27 @@ public class PeripheralService {
     @Autowired
     private PeripheralMapper peripheralMapper;
 
-    // --- CREATE (Permanece o mesmo) ---
+    // ====================================================================
+    // == PASSO 1: INJETAR O SERVIÇO DE HISTÓRICO ==
+    // ====================================================================
+    @Autowired
+    private AssetHistoryService assetHistoryService;
+
     @Transactional
     public PeripheralResponseDTO createPeripheral(PeripheralCreateDTO dto) {
         Peripheral newPeripheral = peripheralMapper.toEntity(dto);
+        
+        // Salva o novo periférico no banco para que ele tenha um ID
         Peripheral savedPeripheral = peripheralRepository.save(newPeripheral);
+
+        // ====================================================================
+        // == PASSO 2: REGISTRAR O EVENTO DE CRIAÇÃO NO HISTÓRICO ==
+        // ====================================================================
+        assetHistoryService.registerEvent(savedPeripheral, HistoryEventType.CRIACAO, "Ativo cadastrado no sistema.", null);
+
         return peripheralMapper.toResponseDTO(savedPeripheral);
     }
 
-    // --- READ (ALL) (Muda o nome para consistência) ---
     @Transactional(readOnly = true)
     public List<PeripheralResponseDTO> getAllPeripherals() {
         return peripheralRepository.findAll().stream()
@@ -39,7 +52,6 @@ public class PeripheralService {
                 .collect(Collectors.toList());
     }
 
-    // --- READ (BY ID) (Refatorado para lançar exceção) ---
     @Transactional(readOnly = true)
     public PeripheralResponseDTO getPeripheralById(Long id) {
         return peripheralRepository.findById(id)
@@ -47,7 +59,6 @@ public class PeripheralService {
                 .orElseThrow(() -> new EntityNotFoundException("Periférico não encontrado com o ID: " + id));
     }
 
-    // --- UPDATE (Refatorado para lançar exceção e usar o mapper elegante) ---
     @Transactional
     public PeripheralResponseDTO updatePeripheral(Long id, PeripheralUpdateDTO dto) {
         Peripheral existingPeripheral = peripheralRepository.findById(id)
@@ -58,7 +69,6 @@ public class PeripheralService {
         return peripheralMapper.toResponseDTO(updatedPeripheral);
     }
 
-    // --- DELETE (Refatorado para ser void e lançar exceção) ---
     @Transactional
     public void deletePeripheral(Long id) {
         if (!peripheralRepository.existsById(id)) {

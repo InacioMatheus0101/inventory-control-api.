@@ -1,6 +1,7 @@
 package com.matheuss.controle_estoque_api.service;
 
 import com.matheuss.controle_estoque_api.domain.Computer;
+import com.matheuss.controle_estoque_api.domain.history.HistoryEventType; // <-- IMPORT ADICIONADO
 import com.matheuss.controle_estoque_api.dto.ComputerCreateDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerResponseDTO;
 import com.matheuss.controle_estoque_api.dto.ComputerUpdateDTO;
@@ -23,13 +24,26 @@ public class ComputerService {
     @Autowired
     private ComputerMapper computerMapper;
 
-    // As injeções de SupplierRepository, CategoryRepository, etc., não são mais necessárias aqui.
+    // ====================================================================
+    // == PASSO 1: INJETAR O SERVIÇO DE HISTÓRICO ==
+    // ====================================================================
+    @Autowired
+    private AssetHistoryService assetHistoryService;
 
-    // --- create, getAll, getById (Permanecem os mesmos) ---
     @Transactional
     public ComputerResponseDTO createComputer(ComputerCreateDTO dto) {
         Computer newComputer = computerMapper.toEntity(dto);
+        
+        // Salva o novo computador no banco para que ele tenha um ID
         Computer savedComputer = computerRepository.save(newComputer);
+
+        // ====================================================================
+        // == PASSO 2: REGISTRAR O EVENTO DE CRIAÇÃO NO HISTÓRICO ==
+        // O usuário associado é 'null' porque o ativo está apenas sendo cadastrado.
+        // ====================================================================
+        assetHistoryService.registerEvent(savedComputer, HistoryEventType.CRIACAO, "Ativo cadastrado no sistema.", null);
+
+        // Retorna o DTO do computador salvo, que agora já contém o evento de criação em sua lista de histórico
         return computerMapper.toResponseDTO(savedComputer);
     }
 
@@ -47,25 +61,18 @@ public class ComputerService {
                 .orElseThrow(() -> new EntityNotFoundException("Computador não encontrado com o ID: " + id));
     }
     
-    // O código manual foi removido. O MapStruct agora faz todo o trabalho.
-
     @Transactional
     public ComputerResponseDTO updateComputer(Long id, ComputerUpdateDTO updateDTO) {
-        // 1. Busca a entidade
         Computer existingComputer = computerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Computador não encontrado com o ID: " + id));
 
-        // 2. MapStruct faz todo o trabalho de atualização
         computerMapper.updateEntityFromDto(updateDTO, existingComputer);
 
-        // 3. Salva a entidade
         Computer updatedComputer = computerRepository.save(existingComputer);
 
-        // 4. Retorna a resposta
         return computerMapper.toResponseDTO(updatedComputer);
     }
 
-    // --- delete (Permanece o mesmo) ---
     @Transactional
     public boolean deleteComputer(Long id) {
         if (computerRepository.existsById(id)) {
